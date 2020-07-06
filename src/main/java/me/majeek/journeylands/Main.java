@@ -13,7 +13,7 @@ public final class Main extends JavaPlugin {
 
         // Listeners
         getServer().getPluginManager().registerEvents(new EventListener(), this);
-        getCommand("jl").setExecutor(new CommandListener());
+        getCommand("journeylands").setExecutor(new CommandListener());
 
         // Managers
     }
