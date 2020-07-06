@@ -11,10 +11,10 @@ import java.util.List;
 
 public class Bottle {
     private Player player;
-    private float xp;
+    private int xp;
     private ItemStack item;
 
-    public Bottle(Player player, float xp){
+    public Bottle(Player player, int xp){
         this.player = player;
         this.xp = xp;
         this.item = createBottle();
@@ -31,7 +31,7 @@ public class Bottle {
 
         itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&a&lExperience Bottle"));
 
-        itemLore.add(ChatColor.LIGHT_PURPLE + "Value " + ChatColor.RESET + Math.round(xp) + " XP");
+        itemLore.add(ChatColor.LIGHT_PURPLE + "Value " + ChatColor.RESET + xp + " XP");
         itemLore.add(ChatColor.LIGHT_PURPLE + "Enchanter " + ChatColor.RESET + player.getName());
 
         itemMeta.setLore(itemLore);

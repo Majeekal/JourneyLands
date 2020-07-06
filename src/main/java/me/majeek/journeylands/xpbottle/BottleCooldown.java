@@ -9,7 +9,7 @@ import java.util.UUID;
 public class BottleCooldown {
     private static HashMap<UUID, Integer> cooldown = new HashMap<>();
 
-    private static int COOLDOWN_DURATION = 1200; // 20 minutes
+    private static int COOLDOWN_DURATION = 60; // 1 minute
 
     public static int getCooldown(UUID uuid){
         return hasCooldown(uuid) ? cooldown.get(uuid) : 0;
