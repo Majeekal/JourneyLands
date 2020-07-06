@@ -34,17 +34,28 @@ public class CommandListener implements CommandExecutor {
                     else if (args[0].equalsIgnoreCase("all") && (player.hasPermission("xpbottle.use.all") || player.isOp()))
                         xpAll(player);
                     else if(args[0].equalsIgnoreCase("clear") && (player.hasPermission("xpbottle.clear") || player.isOp())) {
-                        if(args.length > 1){
-                            if(Bukkit.getPlayer(args[1]) != null)
+                        if(args.length > 1) {
+                            if (Bukkit.getPlayer(args[1]) != null) {
                                 xpClear(Bukkit.getPlayer(args[1]), player);
-                            else
-                                player.sendMessage(ChatColor.RED + "Invalid player name.");
-                        } else{
+                            } else {
+                                sender.sendMessage(ChatColor.RED + "Invalid player name.");
+                            }
+                        }
+                        else
                             xpClear(player, player);
+                    } else if((args[0].equalsIgnoreCase("give") && args.length >= 3) && (player.hasPermission("xpbottle.give") || player.isOp())){
+                        if(Bukkit.getPlayer(args[1]) != null){
+                            if(stringIsInt(args[2])){
+                                xpGive(Bukkit.getPlayer(args[1]), player, args[2]);
+                            } else{
+                                xpHelp(player);
+                            }
+                        } else{
+                            xpHelp(player);
                         }
                     }
                     else
-                        noPermission(player);
+                        xpHelp(player);
                 }
             } else {
                 if ((label.equalsIgnoreCase("jl") || label.equalsIgnoreCase("journeylands")) && (player.hasPermission("jl.help") || player.isOp())){
@@ -54,14 +65,10 @@ public class CommandListener implements CommandExecutor {
                     xpHelp(player);
                 }
                 else
-                    noPermission(player);
+                    xpHelp(player);
             }
         }
         return false;
-    }
-
-    private void noPermission(Player player){
-        player.sendMessage(ChatColor.RED + "You don't have permission for that command!");
     }
 
     private void jlHelp(Player player){
@@ -123,6 +130,14 @@ public class CommandListener implements CommandExecutor {
         BottleCooldown.removeCooldown(player.getUniqueId());
 
         sender.sendMessage(ChatColor.GREEN + "You have removed " + player.getName() + "'s cooldown.");
+    }
+
+    private void xpGive(Player player, Player sender, String strExp){
+        int xp = Integer.parseInt(strExp);
+
+        player.getInventory().addItem(new Bottle(sender, xp).getBottle());
+
+        sender.sendMessage(ChatColor.GREEN + "You have gave " + player.getName() + " " + xp + " xp");
     }
 
     private boolean stringIsInt(String string){
