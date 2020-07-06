@@ -26,11 +26,13 @@ public class BottleCooldown {
                 public void run() {
                     seconds -= 1;
 
-                    cooldown.put(uuid, seconds);
-
                     if(seconds == 0){
                         cooldown.remove(uuid);
                         cancel();
+                    } else if(!cooldown.containsKey(uuid)){
+                        cancel();
+                    } else{
+                        cooldown.put(uuid, seconds);
                     }
                 }
             }.runTaskTimer(Main.getInstance(), 20L, 20L);
@@ -39,5 +41,10 @@ public class BottleCooldown {
 
     public static boolean hasCooldown(UUID uuid){
         return cooldown.containsKey(uuid);
+    }
+
+    public static void removeCooldown(UUID uuid){
+        if(cooldown.containsKey(uuid))
+            cooldown.remove(uuid);
     }
 }

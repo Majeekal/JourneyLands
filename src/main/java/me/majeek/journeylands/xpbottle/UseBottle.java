@@ -1,5 +1,6 @@
 package me.majeek.journeylands.xpbottle;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
@@ -13,9 +14,14 @@ public class UseBottle implements Listener {
             if(event.getItem().getItemMeta().getDisplayName().equalsIgnoreCase(new Bottle(event.getPlayer(), 0).getBottle().getItemMeta().getDisplayName())){
                 event.setCancelled(true);
 
-                ExpHandle.setTotalExperience(event.getPlayer(), getIntInString(event.getItem().getItemMeta().getLore().get(0)) + ExpHandle.getTotalExperience(event.getPlayer()));
+                int xp = 0;
 
-                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&a&l+ " + getIntInString(event.getItem().getItemMeta().getLore().get(0)) + " xp"));
+                for(int i = 0; i < event.getItem().getAmount(); i++)
+                    xp += getIntInString(event.getItem().getItemMeta().getLore().get(0));
+
+                ExpHandle.setTotalExperience(event.getPlayer(), xp + ExpHandle.getTotalExperience(event.getPlayer()));
+
+                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&a&l+ " + xp + " xp"));
                 event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 3, 1);
 
                 event.getPlayer().getInventory().remove(event.getItem());

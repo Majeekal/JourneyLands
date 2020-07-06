@@ -3,6 +3,7 @@ package me.majeek.journeylands.listeners;
 import me.majeek.journeylands.xpbottle.Bottle;
 import me.majeek.journeylands.xpbottle.BottleCooldown;
 import me.majeek.journeylands.xpbottle.ExpHandle;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -32,6 +33,16 @@ public class CommandListener implements CommandExecutor {
                         xpAmount(player, args[0]);
                     else if (args[0].equalsIgnoreCase("all") && (player.hasPermission("xpbottle.use.all") || player.isOp()))
                         xpAll(player);
+                    else if(args[0].equalsIgnoreCase("clear") && (player.hasPermission("xpbottle.clear") || player.isOp())) {
+                        if(args.length > 1){
+                            if(Bukkit.getPlayer(args[1]) != null)
+                                xpClear(Bukkit.getPlayer(args[1]), player);
+                            else
+                                player.sendMessage(ChatColor.RED + "Invalid player name.");
+                        } else{
+                            xpClear(player, player);
+                        }
+                    }
                     else
                         noPermission(player);
                 }
@@ -106,6 +117,12 @@ public class CommandListener implements CommandExecutor {
         } else{
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&l(!) &r&cYou cannot create another XP Bottle for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s."));
         }
+    }
+
+    private void xpClear(Player player, Player sender){
+        BottleCooldown.removeCooldown(player.getUniqueId());
+
+        sender.sendMessage(ChatColor.GREEN + "You have removed " + player.getName() + "'s cooldown.");
     }
 
     private boolean stringIsInt(String string){
