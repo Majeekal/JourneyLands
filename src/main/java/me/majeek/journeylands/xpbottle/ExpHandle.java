@@ -2,85 +2,56 @@ package me.majeek.journeylands.xpbottle;
 
 import org.bukkit.entity.Player;
 
-import java.math.BigDecimal;
-
 public class ExpHandle {
     public static int getTotalExperience(Player player) {
-        int experience = 0;
-        int level = player.getLevel();
+        int exp = Math.round(getExpAtLevel(player) * player.getExp());
+        int currentLevel = player.getLevel();
 
-        if(level >= 0 && level <= 15) {
-            experience = (int) Math.ceil(Math.pow(level, 2) + (6 * level));
-
-            int requiredExperience = 2 * level + 7;
-            double currentExp = Double.parseDouble(Float.toString(player.getExp()));
-
-            experience += Math.ceil(currentExp * requiredExperience);
-
-            return experience;
-        } else if(level > 15 && level <= 30) {
-            experience = (int) Math.ceil((2.5 * Math.pow(level, 2) - (40.5 * level) + 360));
-
-            int requiredExperience = 5 * level - 38;
-            double currentExp = Double.parseDouble(Float.toString(player.getExp()));
-
-            experience += Math.ceil(currentExp * requiredExperience);
-
-            return experience;
-        } else {
-            experience = (int) Math.ceil(((4.5 * Math.pow(level, 2) - (162.5 * level) + 2220)));
-            int requiredExperience = 9 * level - 158;
-            double currentExp = Double.parseDouble(Float.toString(player.getExp()));
-            experience += Math.ceil(currentExp * requiredExperience);
-            return experience;
+        while (currentLevel > 0) {
+            currentLevel--;
+            exp += getExpAtLevel(currentLevel);
         }
+        if (exp < 0) {
+            exp = Integer.MAX_VALUE;
+        }
+        return exp;
     }
 
     public static void setTotalExperience(Player player, int xp) {
-        if(xp >= 0 && xp < 351) {
-            int a = 1; int b = 6; int c = -xp;
-            int level = (int) (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
-            int xpForLevel = (int) (Math.pow(level, 2) + (6 * level));
-            int remainder = xp - xpForLevel;
-            int experienceNeeded = (2 * level) + 7;
-            float experience = (float) remainder / (float) experienceNeeded;
+        player.setExp(0);
+        player.setLevel(0);
+        player.setTotalExperience(0);
 
-            experience = round(experience, 2);
+        //This following code is technically redundant now, as bukkit now calulcates levels more or less correctly
+        //At larger numbers however... player.getExp(3000), only seems to give 2999, putting the below calculations off.
+        int amount = xp;
+        while (amount > 0) {
+            final int expToLevel = getExpAtLevel(player);
 
-            player.setLevel(level);
-            player.setExp(experience);
-        } else if(xp >= 352 && xp < 1507) {
-            double a = 2.5; double b = -40.5; int c = -xp + 360;
-            double dLevel = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
-            int level = (int) Math.floor(dLevel);
-            int xpForLevel = (int) (2.5 * Math.pow(level, 2) - (40.5 * level) + 360);
-            int remainder = xp - xpForLevel;
-            int experienceNeeded = (5 * level) - 38;
-            float experience = (float) remainder / (float) experienceNeeded;
-
-            experience = round(experience, 2);
-
-            player.setLevel(level);
-            player.setExp(experience);
-        } else {
-            double a = 4.5; double b = -162.5; int c = -xp + 2220;
-            double dLevel = (-b + Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
-            int level = (int) Math.floor(dLevel);
-            int xpForLevel = (int) (4.5 * Math.pow(level, 2) - (162.5 * level) + 2220);
-            int remainder = xp - xpForLevel;
-            int experienceNeeded = (9 * level) - 158;
-            float experience = (float) remainder / (float) experienceNeeded;
-
-            experience = round(experience, 2);
-
-            player.setLevel(level);
-            player.setExp(experience);
+            amount -= expToLevel;
+            if (amount >= 0) {
+                // give until next level
+                player.giveExp(expToLevel);
+            } else {
+                // give the rest
+                amount += expToLevel;
+                player.giveExp(amount);
+                amount = 0;
+            }
         }
     }
 
-    private static float round(float d, int decimalPlace) {
-        BigDecimal bd = new BigDecimal(Float.toString(d));
-        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_DOWN);
-        return bd.floatValue();
+    private static int getExpAtLevel(final Player player) {
+        return getExpAtLevel(player.getLevel());
+    }
+
+    public static int getExpAtLevel(final int level) {
+        if (level <= 15) {
+            return (2 * level) + 7;
+        }
+        if ((level >= 16) && (level <= 30)) {
+            return (5 * level) - 38;
+        }
+        return (9 * level) - 158;
     }
 }
