@@ -1,5 +1,6 @@
 package me.majeek.journeylands;
 
+import me.majeek.journeylands.files.XPBottleConfig;
 import me.majeek.journeylands.listeners.CommandListener;
 import me.majeek.journeylands.listeners.EventListener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -10,6 +11,9 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        XPBottleConfig.setup();
+        XPBottleConfig.get().options().copyDefaults(true);
+        XPBottleConfig.save();
 
         // Listeners
         getServer().getPluginManager().registerEvents(new EventListener(), this);

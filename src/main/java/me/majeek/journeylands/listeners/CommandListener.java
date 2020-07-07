@@ -1,10 +1,12 @@
 package me.majeek.journeylands.listeners;
 
+import me.majeek.journeylands.files.XPBottleConfig;
 import me.majeek.journeylands.xpbottle.Bottle;
 import me.majeek.journeylands.xpbottle.BottleCooldown;
 import me.majeek.journeylands.xpbottle.ExpHandle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -70,6 +72,8 @@ public class CommandListener implements CommandExecutor {
                         } else{
                             sender.sendMessage(ChatColor.RED + "Invalid max and min.");
                         }
+                    } else if(args[0].equalsIgnoreCase("reload") && (player.hasPermission("xpbottle.reload") || player.isOp())){
+                        xpReload(player);
                     } else {
                         xpHelp(player);
                     }
@@ -92,31 +96,39 @@ public class CommandListener implements CommandExecutor {
         player.sendMessage(ChatColor.GRAY + "--------------" + " [ " + ChatColor.RESET + ChatColor.GREEN + "Journey Lands" + ChatColor.GRAY + " ] " + "-------------------");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/journeylands" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Displays this.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Experience Bottle commands.");
-
     }
 
     private void xpHelp(Player player){
         player.sendMessage(ChatColor.GRAY + "--------------" + " [ " + ChatColor.RESET + ChatColor.GREEN + "Experience Bottle" + ChatColor.GRAY + " ] " + "-------------------");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle help" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Displays this.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle all" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Withdraws all of your exp points into an exp bottle.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle <amount>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Withdraws <amount> into an exp bottle.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle give <player> <amount>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Gives a user an exp bottle with the <amount> amount.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle giveall <amount>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Sends the whole server an exp bottle with the <amount> amount.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle giverd <player> <min> <max>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Gives a user an exp bottle with a random exp bottle amount.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle giveallrd <min> <max>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Removes the users EXP exhaustion.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle reload" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Reloads the config file.");
     }
 
     private void xpAmount(Player player, String strExp){
         int xp = Integer.parseInt(strExp);
 
         if(!BottleCooldown.hasCooldown(player.getUniqueId())){
-            if(ExpHandle.getTotalExperience(player) != 0 && xp <= ExpHandle.getTotalExperience(player)) {
+            if(xp >= XPBottleConfig.get().getInt("min-withdrawal-amount") && xp <= ExpHandle.getTotalExperience(player) && xp <= XPBottleConfig.get().getInt("max-withdrawal-amount")) {
                 BottleCooldown.addCooldown(player.getUniqueId());
 
                 player.getInventory().addItem(new Bottle(player, xp).getBottle());
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&l- " + xp + " xp"));
 
+                if(XPBottleConfig.get().getBoolean("withdraw-sound.enabled"))
+                    player.playSound(player.getLocation(), Sound.valueOf(XPBottleConfig.get().getString("withdraw-sound.sound")), 3, 1);
+
                 ExpHandle.setTotalExperience(player, ExpHandle.getTotalExperience(player) - xp);
 
                 player.sendMessage(ChatColor.YELLOW + "You are now afflicated with " + ChatColor.UNDERLINE + "EXP Exhaustion" + ChatColor.RESET + ChatColor.YELLOW + " for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s.");
-                player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " use /xpbottle while EXP Exhausted.");
+                player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " withdraw XP while EXP Exhausted.");
             } else{
-                player.sendMessage(ChatColor.RED + "You do not have enough xp to convert.");
+                player.sendMessage(ChatColor.RED + "Invalid amount of xp.");
             }
         } else{
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&l(!) &r&cYou cannot create another XP Bottle for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s."));
@@ -124,8 +136,10 @@ public class CommandListener implements CommandExecutor {
     }
 
     private void xpAll(Player player){
+        int xp = ExpHandle.getTotalExperience(player);
+
         if(!BottleCooldown.hasCooldown(player.getUniqueId())) {
-            if(ExpHandle.getTotalExperience(player) != 0) {
+            if(xp >= XPBottleConfig.get().getInt("min-withdrawal-amount") && xp <= XPBottleConfig.get().getInt("max-withdrawal-amount")) {
                 BottleCooldown.addCooldown(player.getUniqueId());
 
                 player.getInventory().addItem(new Bottle(player, ExpHandle.getTotalExperience(player)).getBottle());
@@ -134,9 +148,9 @@ public class CommandListener implements CommandExecutor {
                 ExpHandle.setTotalExperience(player, 0);
 
                 player.sendMessage(ChatColor.YELLOW + "You are now afflicated with " + ChatColor.UNDERLINE + "EXP Exhaustion" + ChatColor.RESET + ChatColor.YELLOW + " for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s.");
-                player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " use /xpbottle while EXP Exhausted.");
+                player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " withdraw XP while EXP Exhausted.");
             } else{
-                player.sendMessage(ChatColor.RED + "You do not have enough xp to convert.");
+                player.sendMessage(ChatColor.RED + "Invalid amount of xp.");
             }
         } else{
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&c&l(!) &r&cYou cannot create another XP Bottle for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s."));
@@ -198,6 +212,11 @@ public class CommandListener implements CommandExecutor {
         } else{
             sender.sendMessage(ChatColor.RED + "Invalid max and min.");
         }
+    }
+
+    private void xpReload(Player sender){
+        XPBottleConfig.reload();
+        sender.sendMessage(ChatColor.GREEN + "Reload complete.");
     }
 
     private boolean stringIsInt(String string){

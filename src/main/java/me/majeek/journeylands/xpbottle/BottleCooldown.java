@@ -1,6 +1,7 @@
 package me.majeek.journeylands.xpbottle;
 
 import me.majeek.journeylands.Main;
+import me.majeek.journeylands.files.XPBottleConfig;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
@@ -9,18 +10,16 @@ import java.util.UUID;
 public class BottleCooldown {
     private static HashMap<UUID, Integer> cooldown = new HashMap<>();
 
-    private static int COOLDOWN_DURATION = 60; // 1 minute
-
     public static int getCooldown(UUID uuid){
         return hasCooldown(uuid) ? cooldown.get(uuid) : 0;
     }
 
     public static void addCooldown(UUID uuid){
         if(!cooldown.containsKey(uuid)) {
-            cooldown.put(uuid, COOLDOWN_DURATION);
+            cooldown.put(uuid, XPBottleConfig.get().getInt("exp-exhaustion-cooldown"));
 
             new BukkitRunnable() {
-                int seconds = COOLDOWN_DURATION;
+                int seconds = XPBottleConfig.get().getInt("exp-exhaustion-cooldown");
 
                 @Override
                 public void run() {
