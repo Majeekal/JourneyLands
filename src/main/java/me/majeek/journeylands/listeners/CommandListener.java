@@ -31,7 +31,7 @@ public class CommandListener implements CommandExecutor {
                         xpHelp(player);
                     else if(stringIsInt(args[0]) && (player.hasPermission("xpbottle.use") || player.isOp()))
                         xpAmount(player, args[0]);
-                    else if (args[0].equalsIgnoreCase("all") && (player.hasPermission("xpbottle.use.all") || player.isOp()))
+                    else if (args[0].equalsIgnoreCase("all") && (player.hasPermission("xpbottle.all") || player.isOp()))
                         xpAll(player);
                     else if(args[0].equalsIgnoreCase("clear") && (player.hasPermission("xpbottle.clear") || player.isOp())) {
                         if(args.length > 1) {
@@ -40,22 +40,39 @@ public class CommandListener implements CommandExecutor {
                             } else {
                                 sender.sendMessage(ChatColor.RED + "Invalid player name.");
                             }
-                        }
-                        else
+                        } else {
                             xpClear(player, player);
+                        }
                     } else if((args[0].equalsIgnoreCase("give") && args.length >= 3) && (player.hasPermission("xpbottle.give") || player.isOp())){
-                        if(Bukkit.getPlayer(args[1]) != null){
-                            if(stringIsInt(args[2])){
-                                xpGive(Bukkit.getPlayer(args[1]), player, args[2]);
-                            } else{
-                                xpHelp(player);
-                            }
+                        if(Bukkit.getPlayer(args[1]) != null && stringIsInt(args[2]))
+                            xpGive(Bukkit.getPlayer(args[1]), player, args[2]);
+                        else
+                            xpHelp(player);
+                    } else if((args[0].equalsIgnoreCase("giveall") && args.length >= 2) && (player.hasPermission("xpbottle.giveall") || player.isOp())){
+                        if(stringIsInt(args[1])){
+                            xpGiveAll(player, args[1]);
                         } else{
                             xpHelp(player);
                         }
-                    }
-                    else
+                    } else if((args[0].equalsIgnoreCase("giverd") && args.length >= 4) && (player.hasPermission("xpbottle.giverd") || player.isOp())) {
+                        if (Bukkit.getPlayer(args[1]) != null) {
+                            if(stringIsInt(args[2]) && stringIsInt(args[3])){
+                                xpGiveRandom(Bukkit.getPlayer(args[1]), player, args[2], args[3]);
+                            } else{
+                                sender.sendMessage(ChatColor.RED + "Invalid max and min.");
+                            }
+                        } else{
+                            sender.sendMessage(ChatColor.RED + "Invalid player name.");
+                        }
+                    } else if((args[0].equalsIgnoreCase("giveallrd") && args.length >= 3) && (player.hasPermission("xpbottle.giveallrd") || player.isOp())){
+                        if(stringIsInt(args[1]) && stringIsInt(args[2])){
+                            xpGiveAllRandom(player, args[1], args[2]);
+                        } else{
+                            sender.sendMessage(ChatColor.RED + "Invalid max and min.");
+                        }
+                    } else {
                         xpHelp(player);
+                    }
                 }
             } else {
                 if ((label.equalsIgnoreCase("jl") || label.equalsIgnoreCase("journeylands")) && (player.hasPermission("jl.help") || player.isOp())){
@@ -137,7 +154,50 @@ public class CommandListener implements CommandExecutor {
 
         player.getInventory().addItem(new Bottle(sender, xp).getBottle());
 
-        sender.sendMessage(ChatColor.GREEN + "You have gave " + player.getName() + " " + xp + " xp");
+        sender.sendMessage(ChatColor.GREEN + "You have gave " + player.getName() + " " + xp + " xp.");
+    }
+
+    private void xpGiveAll(Player sender, String strExp){
+        int xp = Integer.parseInt(strExp);
+
+        for(Player player : Bukkit.getOnlinePlayers()){
+            player.getInventory().addItem(new Bottle(sender, xp).getBottle());
+        }
+
+        sender.sendMessage(ChatColor.GREEN + "You have gave everyone " + xp + " xp.");
+    }
+
+    private void xpGiveRandom(Player player, Player sender, String minExp, String maxExp){
+        int min = Integer.parseInt(minExp);
+        int max = Integer.parseInt(maxExp);
+
+        if(min <= max) {
+
+            int xp = (int) (Math.random() * max + min);
+
+            player.getInventory().addItem(new Bottle(sender, xp).getBottle());
+
+            sender.sendMessage(ChatColor.GREEN + "You have gave " + player.getName() + " " + xp + " xp.");
+        } else{
+            sender.sendMessage(ChatColor.RED + "Invalid max and min.");
+        }
+    }
+
+    private void xpGiveAllRandom(Player sender, String minExp, String maxExp){
+        int min = Integer.parseInt(minExp);
+        int max = Integer.parseInt(maxExp);
+
+        if(min <= max){
+            int xp = (int) (Math.random() * max + min);
+
+            for(Player player : Bukkit.getOnlinePlayers()){
+                player.getInventory().addItem(new Bottle(sender, xp).getBottle());
+            }
+
+            sender.sendMessage(ChatColor.GREEN + "You have gave everyone " + xp + " xp.");
+        } else{
+            sender.sendMessage(ChatColor.RED + "Invalid max and min.");
+        }
     }
 
     private boolean stringIsInt(String string){
