@@ -1,5 +1,6 @@
 package me.majeek.journeylands.listeners;
 
+import me.majeek.journeylands.files.CommandBlockerConfig;
 import me.majeek.journeylands.files.XPBottleConfig;
 import me.majeek.journeylands.xpbottle.Bottle;
 import me.majeek.journeylands.xpbottle.BottleCooldown;
@@ -12,7 +13,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class CommandListener implements CommandExecutor {
     private HashMap<String, Runnable> commands = new HashMap<>();
@@ -72,23 +76,31 @@ public class CommandListener implements CommandExecutor {
                         } else{
                             sender.sendMessage(ChatColor.RED + "Invalid max and min.");
                         }
-                    } else if(args[0].equalsIgnoreCase("reload") && (player.hasPermission("xpbottle.reload") || player.isOp())){
+                    } else if(args[0].equalsIgnoreCase("reload") && (player.hasPermission("xpbottle.reload") || player.isOp()))
                         xpReload(player);
-                    } else {
-                        char c = '"';
-                        player.sendMessage("Unknown command. Type " + c + "/help" + c + " for help.");
-                    }
+                    else
+                        player.sendMessage("Unknown command. Type \"/help\" for help.");
+                } else if(label.equalsIgnoreCase("commandblocker")) {
+                    if (args[0].equalsIgnoreCase("help") && (player.hasPermission("commandblocker.help") || player.isOp()))
+                        cbHelp(player);
+                    else if ((args[0].equalsIgnoreCase("add") && args.length >= 3) && (player.hasPermission("commandblocker.add") || player.isOp()))
+                        cbAdd(player, args[2]);
+                    else if ((args[0].equalsIgnoreCase("remove") && args.length >= 3) && (player.hasPermission("commandblocker.remove") || player.isOp()))
+                        cbRemove(player, args[2]);
+                    else if (args[0].equalsIgnoreCase("reload") && (player.hasPermission("commandblocker.reload") || player.isOp()))
+                        cbReload(player);
+                    else
+                        player.sendMessage("Unknown command. Type \"/help\" for help.");
                 }
             } else {
-                if ((label.equalsIgnoreCase("jl") || label.equalsIgnoreCase("journeylands")) && (player.hasPermission("jl.help") || player.isOp())){
+                if ((label.equalsIgnoreCase("jl") || label.equalsIgnoreCase("journeylands")) && (player.hasPermission("jl.help") || player.isOp()))
                     jlHelp(player);
-                }
-                else if(label.equalsIgnoreCase("xpbottle") && (player.hasPermission("xpbottle.help") || player.isOp())) {
+                else if(label.equalsIgnoreCase("xpbottle") && (player.hasPermission("xpbottle.help") || player.isOp()))
                     xpHelp(player);
-                } else {
-                    char c = '"';
-                    player.sendMessage("Unknown command. Type " + c + "/help" + c + " for help.");
-                }
+                else if(label.equalsIgnoreCase("commandblocker") && (player.hasPermission("commandblocker.help") || player.isOp()))
+                    cbHelp(player);
+                else
+                    player.sendMessage("Unknown command. Type \"/help\" for help.");
             }
         }
         return false;
@@ -98,6 +110,7 @@ public class CommandListener implements CommandExecutor {
         player.sendMessage(ChatColor.GRAY + "--------------" + " [ " + ChatColor.RESET + ChatColor.GREEN + "Journey Lands" + ChatColor.GRAY + " ] " + "-------------------");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/journeylands" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Displays this.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Experience Bottle commands.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/commandblocker" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Command Blocker commands.");
     }
 
     private void xpHelp(Player player){
@@ -218,6 +231,44 @@ public class CommandListener implements CommandExecutor {
 
     private void xpReload(Player sender){
         XPBottleConfig.reload();
+        sender.sendMessage(ChatColor.GREEN + "Reload complete.");
+    }
+
+    private void cbHelp(Player sender){
+        sender.sendMessage(ChatColor.GRAY + "--------------" + " [ " + ChatColor.RESET + ChatColor.GREEN + "Command Blocker" + ChatColor.GRAY + " ] " + "-------------------");
+        sender.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/commandblocker help" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Displays this.");
+        sender.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/commandblocker add <command>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Adds a command to the block list.");
+        sender.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/commandblocker remove <command>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Removes a command to the block list.");
+        sender.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/commandblocker reload" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Reloads the config file.");
+    }
+
+    private void cbAdd(Player sender, String command){
+        List<String> commands = CommandBlockerConfig.get().getStringList("blocked-commands");
+        commands.add(command);
+
+        CommandBlockerConfig.get().set("blocked-commands", commands);
+        CommandBlockerConfig.get().options().copyDefaults(true);
+        CommandBlockerConfig.save();
+
+        sender.sendMessage(ChatColor.GREEN + "Command has been blocked.");
+    }
+
+    private void cbRemove(Player sender, String command){
+        List<String> commands = CommandBlockerConfig.get().getStringList("blocked-commands");
+
+        if(commands.contains(command)){
+            commands.remove(command);
+
+            CommandBlockerConfig.get().set("blocked-commands", commands);
+            CommandBlockerConfig.get().options().copyDefaults(true);
+            CommandBlockerConfig.save();
+        } else{
+            sender.sendMessage(ChatColor.RED + "Command was not blocked");
+        }
+    }
+
+    private void cbReload(Player sender){
+        CommandBlockerConfig.reload();
         sender.sendMessage(ChatColor.GREEN + "Reload complete.");
     }
 

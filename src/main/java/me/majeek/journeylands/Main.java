@@ -1,5 +1,6 @@
 package me.majeek.journeylands;
 
+import me.majeek.journeylands.files.CommandBlockerConfig;
 import me.majeek.journeylands.files.XPBottleConfig;
 import me.majeek.journeylands.listeners.CommandListener;
 import me.majeek.journeylands.listeners.EventListener;
@@ -11,9 +12,15 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+
+        // Configs
         XPBottleConfig.setup();
         XPBottleConfig.get().options().copyDefaults(true);
         XPBottleConfig.save();
+
+        CommandBlockerConfig.setup();
+        CommandBlockerConfig.get().options().copyDefaults(true);
+        CommandBlockerConfig.save();
 
         // Listeners
         getServer().getPluginManager().registerEvents(new EventListener(), this);

@@ -8,4 +8,4 @@ website: journeylands.ddns.net
 commands:
   journeylands:
     description: Core command.
-    aliases: [jl, xpbottle]
+    aliases: [jl, xpbottle, commandblocker]
