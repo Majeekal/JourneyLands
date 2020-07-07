@@ -90,10 +90,10 @@ public class CommandListener implements CommandExecutor {
                 } else if(label.equalsIgnoreCase("commandblocker")) {
                     if (args[0].equalsIgnoreCase("help") && (player.hasPermission("commandblocker.help") || player.isOp()))
                         cbHelp(player);
-                    else if ((args[0].equalsIgnoreCase("add") && args.length >= 3) && (player.hasPermission("commandblocker.add") || player.isOp()))
-                        cbAdd(player, args[2]);
-                    else if ((args[0].equalsIgnoreCase("remove") && args.length >= 3) && (player.hasPermission("commandblocker.remove") || player.isOp()))
-                        cbRemove(player, args[2]);
+                    else if ((args[0].equalsIgnoreCase("add") && args.length >= 2) && (player.hasPermission("commandblocker.add") || player.isOp()))
+                        cbAdd(player, args[1]);
+                    else if ((args[0].equalsIgnoreCase("remove") && args.length >= 2) && (player.hasPermission("commandblocker.remove") || player.isOp()))
+                        cbRemove(player, args[1]);
                     else if (args[0].equalsIgnoreCase("reload") && (player.hasPermission("commandblocker.reload") || player.isOp()))
                         cbReload(player);
                     else
@@ -118,6 +118,7 @@ public class CommandListener implements CommandExecutor {
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/journeylands" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Displays this.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Experience Bottle commands.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/commandblocker" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Command Blocker commands.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/hybrid" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Anti Cheat commands.");
     }
 
     private void xpHelp(Player player){
@@ -285,8 +286,10 @@ public class CommandListener implements CommandExecutor {
             CommandBlockerConfig.get().set("blocked-commands", commands);
             CommandBlockerConfig.get().options().copyDefaults(true);
             CommandBlockerConfig.save();
+
+            sender.sendMessage(ChatColor.RED + "Command has been unblocked.");
         } else{
-            sender.sendMessage(ChatColor.RED + "Command was not blocked");
+            sender.sendMessage(ChatColor.RED + "Command was not blocked.");
         }
     }
 
