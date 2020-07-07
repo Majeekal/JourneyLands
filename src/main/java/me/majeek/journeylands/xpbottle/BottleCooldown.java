@@ -29,7 +29,7 @@ public class BottleCooldown {
                 public void run() {
                     seconds -= 1;
 
-                    if(seconds == 0){
+                    if(seconds == 0 || hasBypass(uuid)){
                         cooldown.remove(uuid);
                         cancel();
                     } else if(!cooldown.containsKey(uuid)){
