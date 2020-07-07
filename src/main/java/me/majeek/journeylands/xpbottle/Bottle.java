@@ -1,5 +1,7 @@
 package me.majeek.journeylands.xpbottle;
 
+import me.majeek.journeylands.files.XPBottleConfig;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -25,14 +27,19 @@ public class Bottle {
     }
 
     private ItemStack createBottle(){
-        ItemStack item = new ItemStack(Material.EXPERIENCE_BOTTLE);
+        ItemStack item = new ItemStack(Material.valueOf(XPBottleConfig.get().getString("item.material")));
         ItemMeta itemMeta = item.getItemMeta();
         List<String> itemLore = new ArrayList<>();
 
-        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&a&lExperience Bottle"));
+        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', XPBottleConfig.get().getString("item.displayname")));
+        itemMeta.setLocalizedName(xp + "");
 
-        itemLore.add(ChatColor.LIGHT_PURPLE + "Value " + ChatColor.RESET + xp + " XP");
-        itemLore.add(ChatColor.LIGHT_PURPLE + "Enchanter " + ChatColor.RESET + player.getName());
+        for(String lore : XPBottleConfig.get().getStringList("item.lore")){
+            lore = lore.replaceAll("<xp>", xp + "");
+            lore = lore.replaceAll("<enchanter>", player.getName());
+
+            itemLore.add(ChatColor.translateAlternateColorCodes('&', lore));
+        }
 
         itemMeta.setLore(itemLore);
         item.setItemMeta(itemMeta);

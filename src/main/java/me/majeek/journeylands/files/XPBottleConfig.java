@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class XPBottleConfig {
     private static File file;
@@ -26,11 +27,14 @@ public class XPBottleConfig {
 
         xpBottleConfig.addDefault("exp-exhaustion-cooldown", 1200);
         xpBottleConfig.addDefault("min-withdrawal-amount", 1);
-        xpBottleConfig.addDefault("max-withdrawal-amount", 200000);
+        xpBottleConfig.addDefault("max-withdrawal-amount", 10000000);
         xpBottleConfig.addDefault("withdraw-sound.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
         xpBottleConfig.addDefault("withdraw-sound.enabled", true);
         xpBottleConfig.addDefault("redeem-sound.sound", "ENTITY_EXPERIENCE_ORB_PICKUP");
         xpBottleConfig.addDefault("redeem-sound.enabled", true);
+        xpBottleConfig.addDefault("item.displayname", "&a&lExperience Bottle");
+        xpBottleConfig.addDefault("item.material", "EXPERIENCE_BOTTLE");
+        xpBottleConfig.addDefault("item.lore", Arrays.asList("&dValue&r <xp> XP", "&dEnchanter&r <enchanter>"));
     }
 
     public static FileConfiguration get(){

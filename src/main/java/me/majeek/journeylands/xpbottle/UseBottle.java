@@ -17,7 +17,7 @@ public class UseBottle implements Listener {
                 int xp = 0;
 
                 for(int i = 0; i < event.getItem().getAmount(); i++)
-                    xp += getIntInString(event.getItem().getItemMeta().getLore().get(0));
+                    xp += Integer.parseInt(event.getItem().getItemMeta().getLocalizedName());
 
                 ExpHandle.setTotalExperience(event.getPlayer(), xp + ExpHandle.getTotalExperience(event.getPlayer()));
 

@@ -75,7 +75,8 @@ public class CommandListener implements CommandExecutor {
                     } else if(args[0].equalsIgnoreCase("reload") && (player.hasPermission("xpbottle.reload") || player.isOp())){
                         xpReload(player);
                     } else {
-                        xpHelp(player);
+                        char c = '"';
+                        player.sendMessage("Unknown command. Type " + c + "/help" + c + " for help.");
                     }
                 }
             } else {
@@ -84,9 +85,10 @@ public class CommandListener implements CommandExecutor {
                 }
                 else if(label.equalsIgnoreCase("xpbottle") && (player.hasPermission("xpbottle.help") || player.isOp())) {
                     xpHelp(player);
+                } else {
+                    char c = '"';
+                    player.sendMessage("Unknown command. Type " + c + "/help" + c + " for help.");
                 }
-                else
-                    xpHelp(player);
             }
         }
         return false;
