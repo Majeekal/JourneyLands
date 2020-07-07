@@ -76,6 +76,13 @@ public class CommandListener implements CommandExecutor {
                         } else{
                             sender.sendMessage(ChatColor.RED + "Invalid max and min.");
                         }
+                    } else if(args[0].equalsIgnoreCase("bypass") && (player.hasPermission("xpbottle.bypass") || player.isOp())){
+                        if(args.length >= 2 && Bukkit.getPlayer(args[1]) != null)
+                            xpBypass(Bukkit.getPlayer(args[1]), player);
+                        else if(args.length == 1)
+                            xpBypass(player, player);
+                        else
+                            xpHelp(player);
                     } else if(args[0].equalsIgnoreCase("reload") && (player.hasPermission("xpbottle.reload") || player.isOp()))
                         xpReload(player);
                     else
@@ -122,6 +129,8 @@ public class CommandListener implements CommandExecutor {
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle giveall <amount>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Sends the whole server an exp bottle with the <amount> amount.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle giverd <player> <min> <max>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Gives a user an exp bottle with a random exp bottle amount.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle giveallrd <min> <max>" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Removes the users EXP exhaustion.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle bypass [player]" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Bypasses player from EXP exhaustion.");
+        player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle clear [player]" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Clears player EXP exhaustion.");
         player.sendMessage(ChatColor.GRAY + "- " + ChatColor.GREEN + "/xpbottle reload" + ChatColor.WHITE + " - " + ChatColor.GRAY + "Reloads the config file.");
     }
 
@@ -140,8 +149,10 @@ public class CommandListener implements CommandExecutor {
 
                 ExpHandle.setTotalExperience(player, ExpHandle.getTotalExperience(player) - xp);
 
-                player.sendMessage(ChatColor.YELLOW + "You are now afflicated with " + ChatColor.UNDERLINE + "EXP Exhaustion" + ChatColor.RESET + ChatColor.YELLOW + " for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s.");
-                player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " withdraw XP while EXP Exhausted.");
+                if(!BottleCooldown.hasBypass(player.getUniqueId())) {
+                    player.sendMessage(ChatColor.YELLOW + "You are now afflicated with " + ChatColor.UNDERLINE + "EXP Exhaustion" + ChatColor.RESET + ChatColor.YELLOW + " for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s.");
+                    player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " withdraw XP while EXP Exhausted.");
+                }
             } else{
                 player.sendMessage(ChatColor.RED + "Invalid amount of xp.");
             }
@@ -162,8 +173,10 @@ public class CommandListener implements CommandExecutor {
 
                 ExpHandle.setTotalExperience(player, 0);
 
-                player.sendMessage(ChatColor.YELLOW + "You are now afflicated with " + ChatColor.UNDERLINE + "EXP Exhaustion" + ChatColor.RESET + ChatColor.YELLOW + " for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s.");
-                player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " withdraw XP while EXP Exhausted.");
+                if(!BottleCooldown.hasBypass(player.getUniqueId())) {
+                    player.sendMessage(ChatColor.YELLOW + "You are now afflicated with " + ChatColor.UNDERLINE + "EXP Exhaustion" + ChatColor.RESET + ChatColor.YELLOW + " for " + BottleCooldown.getCooldown(player.getUniqueId()) / 60 + "m " + BottleCooldown.getCooldown(player.getUniqueId()) % 60 + "s.");
+                    player.sendMessage(ChatColor.YELLOW + "You " + ChatColor.UNDERLINE + "cannot" + ChatColor.RESET + ChatColor.YELLOW + " withdraw XP while EXP Exhausted.");
+                }
             } else{
                 player.sendMessage(ChatColor.RED + "Invalid amount of xp.");
             }
@@ -225,7 +238,17 @@ public class CommandListener implements CommandExecutor {
 
             sender.sendMessage(ChatColor.GREEN + "You have gave everyone " + xp + " xp.");
         } else{
-            sender.sendMessage(ChatColor.RED + "Invalid max and min.");
+            sender.sendMessage(ChatColor.RED + "Invalid max and min.");///
+        }
+    }
+
+    private void xpBypass(Player player, Player sender){
+        if(BottleCooldown.hasBypass(player.getUniqueId())){
+            BottleCooldown.removeBypass(player.getUniqueId());
+            sender.sendMessage(ChatColor.RED + "EXP Exhaustion Bypass has been removed.");
+        } else{
+            BottleCooldown.addBypass(player.getUniqueId());
+            sender.sendMessage(ChatColor.GREEN + "EXP Exhaustion Bypass has been added.");
         }
     }
 
